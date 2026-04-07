@@ -1,42 +1,27 @@
-name: Pastila Zilei
+name: Pastila Zilei Test
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 9 * * 1-5"
 
 jobs:
-  generate-and-send:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate HTML email
+      - name: Create test email
         run: |
-          cat > output-email.html <<'EOF'
-          <html>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6;">
-              <h1>Pastila zilei</h1>
-              <p>Acesta este un email test trimis automat din GitHub Actions.</p>
-              <p>Dacă ai primit acest mesaj, înseamnă că workflow-ul, Resend și lista de destinatari funcționează.</p>
-            </body>
-          </html>
-          EOF
+          echo '<html><body><h1>Pastila Zilei - TEST</h1><p>Salut! Daca primesti acest email, workflow-ul functioneaza.</p></body></html>' > email.html
 
-      - name: Send email with Resend
+      - name: Send test email
         run: |
-          jq -n \
-            --arg from "Pastila Zilei <onboarding@resend.dev>" \
-            --arg to1 "${{ secrets.EMAIL_TO_1 }}" \
-            --arg to2 "${{ secrets.EMAIL_TO_2 }}" \
-            --arg to3 "${{ secrets.EMAIL_TO_3 }}" \
-            --arg subject "Pastila zilei - test" \
-            --arg html "$(cat output-email.html)" \
-            '{from:$from,to:[$to1,$to2,$to3],subject:$subject,html:$html}' > payload.json
-
-          curl -X POST https://api.resend.com/emails \
-            -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d @payload.json
+          curl -X POST 'https://api.resend.com/emails' \
+            -H 'Content-Type: application/json' \
+            -H 'Authorization: Bearer ${{ secrets.RESEND_API_KEY }}' \
+            -d '{
+              "from": "Pastila Zilei <onboarding@resend.dev>",
+              "to": ["${{ secrets.EMAIL_TO_1 }}"],
+              "subject": "Pastila Zilei - TEST",
+              "html": "'"$(cat email.html)"'"
+            }'
