@@ -26,8 +26,8 @@ jobs:
       - name: Send email with Resend
         run: |
           jq -n \
-            --arg from "Pastila Zilei <onboarding@resend.dev>" \
-            --arg to "${{ secrets.EMAIL_TO_1 }}" \
+            --arg from "Transylvania Nutrition <office@transylvanianutrition.com>" \
+            --arg to "office@transylvanianutrition.com" \
             --arg subject "Pastila Zilei - TEST" \
             --arg html "$(cat email.html)" \
             '{from:$from,to:[$to],subject:$subject,html:$html}' > payload.json
@@ -36,4 +36,3 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d @payload.json | tee resend-response.json
-
