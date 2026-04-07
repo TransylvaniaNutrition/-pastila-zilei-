@@ -70,9 +70,11 @@ jobs:
           jq -n \
             --arg from "Pastila Zilei <office@transylvanianutrition.com>" \
             --arg to1 "${{ secrets.EMAIL_TO_1 }}" \
+            --arg to2 "${{ secrets.EMAIL_TO_2 }}" \
+            --arg to3 "${{ secrets.EMAIL_TO_3 }}" \
             --arg subject "Pastila zilei" \
             --rawfile html output-email.html \
-            '{from:$from,to:[$to1],subject:$subject,html:$html}' > payload.json
+            '{from:$from,to:[$to1,$to2,$to3],subject:$subject,html:$html}' > payload.json
 
           curl -s -X POST https://api.resend.com/emails \
             -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
