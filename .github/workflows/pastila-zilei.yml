@@ -1,62 +1,38 @@
-name: Pastila Zilei
+name: Pastila Zilei Test
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 9 * * 1-5"
 
 jobs:
-  generate-and-send:
+  send-test-email:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate article with Claude
-        id: claude
-        uses: anthropics/claude-code-action@beta
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            Scrie in limba romana un email cu titlul "Pastila zilei".
-
-            Alege un subiect din fisierul topics.txt.
-
-            Emailul trebuie sa fie foarte clar, foarte usor de inteles, ca pentru un om obisnuit.
-            Tonul trebuie sa fie cald, profesionist si usor de dat mai departe colegilor sau clientilor.
-
-            Structura emailului trebuie sa fie:
-            1. Ce este
-            2. Istorie si cum a aparut
-            3. Impact si de ce a devenit popular
-            4. Cum functioneaza
-            5. Cum se foloseste
-            6. Cand este util
-            7. Contraindicatii si atentionari
-            8. Tips & Tricks
-            9. 3 lucruri importante de retinut
-
-            Scrie in format HTML simplu, frumos, lizibil pentru email.
-
-            Salveaza rezultatul in fisierul output-email.html
-
-      - name: Save Claude output
+      - name: Create test email
         run: |
-          echo '${{ steps.claude.outputs.response }}' > output-email.html
+          cat > email.html <<'EOF'
+          <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+              <h1>Pastila Zilei - TEST</h1>
+              <p>Salut!</p>
+              <p>Daca primesti acest email, inseamna ca GitHub Actions + Resend functioneaza corect.</p>
+            </body>
+          </html>
+          EOF
 
       - name: Send email with Resend
         run: |
+          jq -n \
+            --arg from "Pastila Zilei <onboarding@resend.dev>" \
+            --arg to "${{ secrets.EMAIL_TO_1 }}" \
+            --arg subject "Pastila Zilei - TEST" \
+            --arg html "$(cat email.html)" \
+            '{from:$from,to:[$to],subject:$subject,html:$html}' > payload.json
+
           curl -X POST https://api.resend.com/emails \
             -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "from": "Pastila Zilei <onboarding@resend.dev>",
-              "to": [
-                "${{ secrets.EMAIL_TO_1 }}",
-                "${{ secrets.EMAIL_TO_2 }}",
-                "${{ secrets.EMAIL_TO_3 }}"
-              ],
-              "subject": "Pastila zilei",
-              "html": '"$(jq -Rs . < output-email.html)"'
-            }'
+            -d @payload.json
