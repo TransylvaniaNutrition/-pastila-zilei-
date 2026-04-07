@@ -27,7 +27,7 @@ jobs:
         run: |
           jq -n \
             --arg from "Transylvania Nutrition <office@transylvanianutrition.com>" \
-            --arg to "office@transylvanianutrition.com" \
+            --arg to "${{ secrets.EMAIL_TO_1 }}" \
             --arg subject "Pastila Zilei - TEST" \
             --arg html "$(cat email.html)" \
             '{from:$from,to:[$to],subject:$subject,html:$html}' > payload.json
