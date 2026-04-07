@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 9 * * 1-5"
-    
+
 permissions:
   contents: read
   id-token: write
@@ -18,15 +18,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate article with Claude
+        id: claude
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
             Alege primul subiect din topics.txt.
 
-            Creeaza direct un fisier numit output-email.html in radacina repository-ului.
-
-            Fisierul trebuie sa contina un email HTML complet, in limba romana, cu titlul "Pastila zilei".
+            Scrie in limba romana un email HTML complet, cu titlul "Pastila zilei".
 
             Structura simpla:
             - Ce este
@@ -36,13 +35,22 @@ jobs:
             - Contraindicatii
             - 3 tips
 
-            Important:
-            - scrie direct in fisierul output-email.html
-            - nu returna markdown
-            - nu returna explicatii
-            - foloseste HTML simplu, lizibil pentru email
+            Returneaza DOAR HTML complet pentru email.
           claude_args: |
             --max-turns 8
+
+      - name: Save Claude output
+        env:
+          CLAUDE_HTML: ${{ steps.claude.outputs.response }}
+        run: |
+          python3 - <<'PY'
+          import os
+          html = os.environ.get("CLAUDE_HTML", "").strip()
+          if not html:
+              raise SystemExit("Claude output este gol")
+          with open("output-email.html", "w", encoding="utf-8") as f:
+              f.write(html)
+          PY
 
       - name: Check generated HTML
         run: |
