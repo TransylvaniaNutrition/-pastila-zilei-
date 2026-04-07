@@ -35,19 +35,24 @@ jobs:
             - Contraindicatii
             - 3 tips
 
-            Returneaza DOAR HTML complet pentru email.
+            Returneaza raspunsul ca JSON cu cheia "html".
           claude_args: |
             --max-turns 8
+            --json-schema '{"type":"object","properties":{"html":{"type":"string"}},"required":["html"]}'
 
       - name: Save Claude output
         env:
-          CLAUDE_HTML: ${{ steps.claude.outputs.response }}
+          CLAUDE_JSON: ${{ steps.claude.outputs.structured_output }}
         run: |
           python3 - <<'PY'
-          import os
-          html = os.environ.get("CLAUDE_HTML", "").strip()
+          import os, json
+          raw = os.environ.get("CLAUDE_JSON", "").strip()
+          if not raw:
+              raise SystemExit("structured_output este gol")
+          data = json.loads(raw)
+          html = data.get("html", "").strip()
           if not html:
-              raise SystemExit("Claude output este gol")
+              raise SystemExit("Campul html este gol")
           with open("output-email.html", "w", encoding="utf-8") as f:
               f.write(html)
           PY
