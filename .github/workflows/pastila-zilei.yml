@@ -23,27 +23,20 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Scrie in limba romana un email HTML cu titlul "Pastila zilei".
+            Alege primul subiect din topics.txt si scrie un email HTML "Pastila zilei" despre el.
 
-            Alege un subiect din fisierul topics.txt.
+            Structura simpla:
+            - Ce este
+            - Istorie scurta
+            - Cum functioneaza
+            - Cum se foloseste
+            - Contraindicatii
+            - 3 tips
 
-            Emailul trebuie sa fie foarte clar, foarte usor de inteles, ca pentru un om obisnuit.
-            Tonul trebuie sa fie cald, profesionist si usor de dat mai departe colegilor sau clientilor.
-
-            Structura emailului trebuie sa fie:
-            1. Ce este
-            2. Istorie si cum a aparut
-            3. Impact si de ce a devenit popular
-            4. Cum functioneaza
-            5. Cum se foloseste
-            6. Cand este util
-            7. Contraindicatii si atentionari
-            8. Tips & Tricks
-            9. 3 lucruri importante de retinut
-
-            Returneaza doar HTML complet pentru body-ul emailului, fara markdown, fara explicatii suplimentare.
+            Returneaza DOAR HTML complet pentru email, fara alte explicatii.
           claude_args: |
-            --max-turns 3
+            --max-turns 8
+
 
       - name: Save Claude output
         run: |
