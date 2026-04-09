@@ -23,21 +23,19 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Alege primul subiect din topics.txt.
+            Genereaza JSON cu cheia "html".
 
-            Scrie in limba romana un email HTML complet, cu titlul "Pastila zilei".
+            Scrie un email HTML in romana despre:
+            ${{ steps.topic.outputs.topic }}
 
-            Structura simpla:
+            Sectiuni:
             - Ce este
-            - Istorie scurta
             - Cum functioneaza
             - Cum se foloseste
-            - Contraindicatii
+            - Atentionari
             - 3 tips
-
-            Returneaza raspunsul ca JSON cu cheia "html".
           claude_args: |
-            --max-turns 8
+            --max-turns 3
             --json-schema '{"type":"object","properties":{"html":{"type":"string"}},"required":["html"]}'
 
       - name: Save Claude output
